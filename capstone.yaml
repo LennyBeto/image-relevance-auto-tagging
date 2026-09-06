@@ -1,0 +1,24 @@
+name: image-relevance-and-auto-tagging
+run: docker compose up --build
+seed: python scripts/seed_corpus.py && python -m app.worker --once
+test: pytest -q
+base_url: http://localhost:8000
+endpoints:
+  - method: POST
+    path: /images/ingest
+    desc: Kick off batch vision-tagging job over the corpus
+  - method: GET
+    path: /jobs/{job_id}
+    desc: Poll job status / retries / cost
+  - method: GET
+    path: /posts/{post_id}/images
+    desc: Ranked image suggestions for a post, guard-filtered
+  - method: POST
+    path: /review/{suggestion_id}/approve
+    desc: Approve a suggested image pairing
+  - method: POST
+    path: /review/{suggestion_id}/reject
+    desc: Reject a suggested image pairing
+  - method: GET
+    path: /eval/run
+    desc: Run the labeled eval set, return top-1 precision
